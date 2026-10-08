@@ -1,0 +1,21 @@
+name = "auxy-ai"
+main = "src/index.js"
+compatibility_date = "2026-10-08"
+workers_dev = true
+
+[[routes]]
+pattern = "web.auxy.ir"
+custom_domain = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[ai]
+binding = "AI"
+
+[vars]
+SUPABASE_URL = "https://realtoiyrtvjfohovoda.supabase.co"
+SUPABASE_ANON_KEY = "sb_publishable_Y44ggVO5LY98YbNIGp2L-Q_HIUm7GCS"
+AUXY_AI_MAX_TOKENS = "2400"
+AUXY_AI_MODEL = "@cf/openai/gpt-oss-120b"
