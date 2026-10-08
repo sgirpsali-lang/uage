@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>ورود | Auxy</title>
+<link rel="icon" href="/assets/auxy-black.png" type="image/png">
+<script src="/js/theme.js?v=A13.7"></script>
+<link rel="stylesheet" href="/css/app.css?v=A13.7">
+</head>
+<body class="auth-page">
+<div class="auth-aurora a"></div><div class="auth-aurora b"></div>
+<main class="auth-wrap"><section class="auth-card glass-card">
+<div class="auth-mark"><img src="/assets/auxy-wordmark-white.png" alt="Auxy"><span class="eyebrow">AUXY ACCOUNT</span></div>
+<h1 id="title">ورود</h1><p class="lead" id="lead">با نام کاربری و رمز عبور وارد شوید.</p>
+<nav class="auth-tabs"><button class="auth-tab active" data-mode="login">ورود</button><button class="auth-tab" data-mode="signup">ثبت‌نام</button><button class="auth-tab" data-mode="recover">بازیابی</button></nav>
+<form id="auth-form" novalidate>
+<div class="field"><label for="username">نام کاربری</label><input id="username" class="input" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" placeholder="username"></div>
+<div class="field" id="email-field" hidden><label for="email">ایمیل <span id="email-note">اختیاری</span></label><input id="email" class="input" type="email" maxlength="180" autocomplete="email" dir="ltr" placeholder="example@email.com"></div>
+<div class="field" id="password-field"><label for="password">رمز عبور</label><div class="password-field"><input id="password" class="input" type="password" autocomplete="current-password" minlength="8" placeholder="رمز عبور"><button id="toggle-password" class="password-toggle" type="button" aria-label="نمایش رمز"></button></div></div>
+<div class="field" id="repeat-field" hidden><label for="repeat">تکرار رمز</label><input id="repeat" class="input" type="password" autocomplete="new-password" minlength="8" placeholder="تکرار رمز"></div>
+<div class="field" id="code-field" hidden><label for="code">کد بازیابی</label><input id="code" class="input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" dir="ltr" placeholder="000000"></div>
+<div class="captcha-card" id="captcha" hidden><div class="captcha-head"><b>sgiCAPTCHA</b><small>تأیید امنیتی Auxy</small></div><div class="captcha-track" id="captcha-track"><button type="button" id="captcha-button" aria-label="تأیید sgiCAPTCHA"><i id="captcha-knob" class="captcha-knob"></i><span class="captcha-label">برای تأیید، بکش یا لمس کن</span></button></div><div class="captcha-status" id="captcha-status"></div></div>
+<button id="submit" class="primary-cta" type="submit">ورود به Auxy</button><div id="message" class="auth-msg" role="alert" aria-live="polite"></div>
+</form>
+<div class="auth-foot" id="auth-foot">ایمیل هنگام ساخت حساب اختیاری است؛ برای بازیابی رمز، ایمیل بازیابی ثبت‌شده لازم است.</div>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+<script src="/js/config.js?v=A13.7"></script>
+<script src="/js/utils.js?v=A13.7"></script>
+<script src="/js/ui.js?v=A13.7"></script>
+<script src="/js/supabase.js?v=A13.7"></script>
+<script src="/js/auth.js?v=A13.7"></script>
+<script>
+(()=>{'use strict';
+const $=(s)=>document.querySelector(s),state={mode:'login',verified:false,recovery:false,username:'',email:''};
+const cfg={login:['ورود','با نام کاربری و رمز عبور وارد شوید.','ورود به Auxy'],signup:['ساخت حساب','نام کاربری و رمز بسازید. ایمیل برای بازیابی اختیاری است.','ساخت حساب'],recover:['بازیابی رمز','نام کاربری و ایمیل بازیابی حساب را وارد کنید.','ارسال کد بازیابی']};
+const nextTarget=()=>{try{const n=localStorage.getItem('auxy-next');if(n){localStorage.removeItem('auxy-next');return n}}catch{}return '/home/'};
+function msg(t='',ok=false){const e=$('#message');if(!e)return;e.textContent=t;e.className='auth-msg '+(ok?'ok':'')}
+function capReset(){state.verified=false;const track=$('#captcha-track'),k=$('#captcha-knob');track?.classList.remove('ok');if(k){k.style.transform='translateX(0)'}const st=$('#captcha-status');if(st)st.textContent='';const lab=$('#captcha-button .captcha-label');if(lab)lab.textContent='برای تأیید، بکش یا لمس کن'}
+function capSet(ok){state.verified=!!ok;const track=$('#captcha-track'),k=$('#captcha-knob');if(state.verified){track?.classList.add('ok');if(k)k.style.transform='translateX(0)';const st=$('#captcha-status');if(st)st.textContent='تأیید شد';const lab=$('#captcha-button .captcha-label');if(lab)lab.textContent='تأیید امنیتی موفق بود'}}
+function mode(m,fromHash=false){state.mode=m;state.recovery=false;const c=cfg[m];$('#title').textContent=c[0];$('#lead').textContent=c[1];$('#submit').textContent=c[2];$('#username').hidden=false;$('#email-field').hidden=m==='login';$('#email-note').hidden=m!=='signup';$('#email').required=m==='recover';$('#password-field').hidden=false;$('#repeat-field').hidden=m!=='signup';$('#code-field').hidden=true;$('#captcha').hidden=m==='login';$('#password').autocomplete=m==='signup'?'new-password':'current-password';$('#auth-foot').textContent=m==='signup'?'ایمیل برای ساخت حساب اختیاری است. افزودن ایمیل، بازیابی رمز را فعال می‌کند.':m==='recover'?'کد بازیابی به ایمیل ثبت‌شده ارسال می‌شود.':'نام کاربری و رمز عبور خود را وارد کنید.';document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));msg('');capReset();if(!fromHash)history.replaceState(null,'',`#${m}`)}
+function recoveryStep(){state.recovery=true;$('#title').textContent='تغییر رمز';$('#lead').textContent='کد ایمیل را وارد کنید و رمز جدید بسازید.';$('#submit').textContent='تغییر رمز';$('#username').hidden=true;$('#email-field').hidden=false;$('#email').required=true;$('#password-field').hidden=false;$('#repeat-field').hidden=false;$('#code-field').hidden=false;$('#captcha').hidden=true;$('#email-note').hidden=true;$('#password').autocomplete='new-password';msg('کد ارسال‌شده را وارد کنید.',true)}
+function bind(){document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>mode(b.dataset.mode)));const cap=$('#captcha-button');cap?.addEventListener('click',()=>capSet(true));const toggle=$('#toggle-password');toggle?.addEventListener('click',()=>{const i=$('#password');i.type=i.type==='password'?'text':'password';toggle.innerHTML='<svg class="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"><path d="M2.6 12s3.4-5.3 9.4-5.3 9.4 5.3 9.4 5.3-3.4 5.3-9.4 5.3S2.6 12 2.6 12Z"/><circle cx="12" cy="12" r="2.5"/></svg>'});$('#auth-form')?.addEventListener('submit',async e=>{e.preventDefault();const btn=$('#submit');btn.disabled=true;msg('');try{const u=$('#username').value.trim(),email=$('#email').value.trim().toLowerCase(),pw=$('#password').value,rep=$('#repeat').value;if(!window.AUXY_AUTH)throw new Error('ماژول حساب کاربری بارگذاری نشد؛ صفحه را دوباره باز کنید.');if(state.mode==='login'){await AUXY_AUTH.login(u,pw);location.replace(nextTarget());return}if(state.mode==='signup'){if(!state.verified)throw new Error('تأیید امنیتی را کامل کنید.');if(pw!==rep)throw new Error('تکرار رمز یکسان نیست.');await AUXY_AUTH.signup(u,email,pw);location.replace(nextTarget());return}if(!state.recovery){if(!state.verified)throw new Error('تأیید امنیتی را کامل کنید.');if(!email)throw new Error('ایمیل بازیابی را وارد کنید.');await AUXY_AUTH.sendRecovery(u,email);state.username=u;state.email=email;recoveryStep();history.replaceState(null,'','#recover-code');return}if(pw!==rep)throw new Error('تکرار رمز یکسان نیست.');await AUXY_AUTH.verifyRecovery(state.email,$('#code').value.trim(),pw);msg('رمز عبور تغییر کرد؛ در حال ورود…',true);await AUXY_AUTH.login(state.username,pw);location.replace('/home/')}catch(err){msg(err?.message||'عملیات انجام نشد.')}finally{btn.disabled=false}})};
+const h=(location.hash||'').toLowerCase();mode(h==='#signup'?'signup':h==='#recover'||h==='#recover-code'?'recover':'login',true);bind();
+})();
+</script>
+</body></html>
