@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050608">
+<meta name="robots" content="index,follow">
+<title>Auxy</title>
+<link rel="icon" href="/assets/auxy-black.png" type="image/png">
+<link rel="preconnect" href="https://realtoiyrtvjfohovoda.supabase.co" crossorigin>
+<style>html,body{margin:0;width:100%;height:100%;background:#050608;color:#fff;overflow:hidden}#boot{position:fixed;inset:0;background:#050608;display:grid;place-items:center}#boot i{width:24px;height:24px;border:2px solid rgba(255,255,255,.14);border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite}@keyframes s{to{transform:rotate(360deg)}}</style>
+</head>
+<body>
+<div id="boot" aria-label="Loading"><i></i></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+<script>
+(()=>{
+  const url='https://realtoiyrtvjfohovoda.supabase.co';
+  const key='sb_publishable_Y44ggVO5LY98YbNIGp2L-Q_HIUm7GCS';
+  try{
+    const sb=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+    let done=false;
+    const go=p=>{if(done)return;done=true;location.replace(p)};
+    const timeout=setTimeout(()=>go('/login/'),3500);
+    const rememberNext=(u)=>{try{localStorage.setItem('auxy-next',u)}catch{}};
+    sb.auth.getSession().then(async r=>{clearTimeout(timeout);const session=r&&r.data&&r.data.session;const raw=location.pathname.replace(/^\/+|\/+$/g,'');if(!raw){go(session?'/home/':'/login/');return}if(raw.startsWith('invite/')){const next='/home/#/invite/'+encodeURIComponent(raw.slice(7));if(!session)rememberNext(next);go(session?next:'/login/');return}const parts=raw.split('/').filter(Boolean);if(parts.length===1){try{const rr=await sb.rpc('auxy_resolve_public_handle',{p_handle:parts[0]});const d=Array.isArray(rr?.data)?rr.data[0]:rr?.data;if(d){const next=d.owner_type==='user'?'/home/#/profile/'+encodeURIComponent(parts[0]):'/home/#/community/'+encodeURIComponent(parts[0]);if(!session)rememberNext(next);go(session?next:'/login/');return}}catch(e){}}go(session?'/home/':'/login/')}).catch(()=>{clearTimeout(timeout);go('/login/')});
+  }catch(e){location.replace('/login/')}
+})();
+</script>
+</body>
+</html>
